@@ -10,17 +10,15 @@ class SpotifyWrapper : public QWidget
     Q_OBJECT
 public:
     SpotifyWrapper(QString clientId, QString clientSecret, QWidget *parent);
-    bool isPermanent() const;
-    void setPermanent(bool value);
     void grant();
 
-public slots:
+private slots:
     void authStatusChanged();
-    void granted();
+    void accessGranted();
 
 private:
     QOAuth2AuthorizationCodeFlow m_oauth2;
-    bool permanent = false;
+    bool grantedAccess = false;
 
 };
 

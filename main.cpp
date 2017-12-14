@@ -2,7 +2,7 @@
 #include <QWidget>
 //#include "player.h"
 #include "spotifywrapper.h"
-#include "clientKeys.h"
+#include "clientkeys.h"
 
 
 int main(int argc, char *argv[]){
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
 
 //    Player player(&window);
 
-    SpotifyWrapper spotify(clientId, clientSecret), &window);
+    SpotifyWrapper spotify(clientId, clientSecret, &window);
 
     spotify.grant();
 
