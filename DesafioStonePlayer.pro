@@ -8,10 +8,18 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 SOURCES += \
     main.cpp \
     player.cpp \
-    spotifywrapper.cpp
+    spotifywrapper.cpp \
+    searchbar.cpp \
+    resultsbox.cpp \
+    resultitem.cpp \
+    controller.cpp
 
 HEADERS += \
     player.h \
     spotifywrapper.h \
-    clientkeys.h
+    clientkeys.h \
+    searchbar.h \
+    resultsbox.h \
+    resultitem.h \
+    controller.h
 

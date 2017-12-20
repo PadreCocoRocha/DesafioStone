@@ -1,12 +1,17 @@
 #include "spotifywrapper.h"
+#include "player.h"
+#include "searchbar.h"
 #include <QWidget>
 #include <QTextStream>
+#include <QJsonObject>
+#include <QtNetwork>
 #include <QtNetworkAuth>
 #include <QDesktopServices>
-#include <player.h>
 
 SpotifyWrapper::SpotifyWrapper(QString clientId, QString clientSecret, Player *parent)
 {
+    m_player = parent;
+
     // Setup OAuth2 settings for Spotify authentication
     m_oauth2 = new QOAuth2AuthorizationCodeFlow();
     auto replyHandler = new QOAuthHttpServerReplyHandler(8080, this);
@@ -20,24 +25,14 @@ SpotifyWrapper::SpotifyWrapper(QString clientId, QString clientSecret, Player *p
     connect(m_oauth2, &QOAuth2AuthorizationCodeFlow::authorizeWithBrowser,
             &QDesktopServices::openUrl);
 
-    connect(m_oauth2, SIGNAL(statusChanged(Status)),
-            this, SLOT(authStatusChanged()));
-
-    connect(m_oauth2, SIGNAL(granted()),
-            this, SLOT(accessGranted()));
-
-    connect(parent, SIGNAL(searchSpotify(QString)),
-            this, SLOT(searchContent(QString)));
-}
-
-//public slots
-void SpotifyWrapper::grant()
-{
-    m_oauth2->grant();
+    connect(m_oauth2, SIGNAL(statusChanged(Status)), this, SLOT(authStatusChanged()));
+    connect(m_oauth2, SIGNAL(granted()), this, SLOT(accessGranted()));
+    connect(parent->getSearchBarInstance(), SIGNAL(triggerSpotifySearch(QString,int)),
+            this, SLOT(searchContent(QString,int)));
 }
 
 QUrl SpotifyWrapper::buildQueryURL(QString query){
-    QString str, extra;
+    QString str;
     QTextStream out(&str);
 
     out << "https://api.spotify.com/v1/search"
@@ -54,7 +49,51 @@ QUrl SpotifyWrapper::buildQueryURL(QString query){
     return QUrl(str);
 }
 
-// private slots
+QUrl SpotifyWrapper::getTrack(QString href){
+    QUrl query_url(href);
+
+    return query_url;
+}
+
+// public slots
+
+void SpotifyWrapper::searchContent(QString query, int offset){
+    QUrl query_url = buildQueryURL(query);
+
+    auto reply = m_oauth2->get(query_url);
+
+    // wait for request finished signal and output error if any
+    connect(reply, &QNetworkReply::finished, [=]() {
+        if (reply->error() != QNetworkReply::NoError) {
+            m_player->printInfo(reply->errorString());
+            return;
+        }
+        // Read reply data to ByteArray
+        QByteArray raw_data = reply->readAll();
+//       m_player->printInfo(raw_data);
+
+        const QJsonDocument data =
+                QJsonDocument::fromJson(raw_data);
+
+        if (data.isNull()){
+            m_player->printInfo("Failed parsing reply data");
+            return;
+        }
+
+        QJsonObject result = data.object();
+
+        // Convert JSON text to object and return data through signal
+        emit searchDone(result);
+    });
+}
+
+void SpotifyWrapper::searchParamChanged(QString query){}
+
+void SpotifyWrapper::grant()
+{
+    m_oauth2->grant();
+}
+
 void SpotifyWrapper::authStatusChanged(){
     QString state;
 
@@ -73,37 +112,8 @@ void SpotifyWrapper::authStatusChanged(){
         case QAbstractOAuth::Status::RefreshingToken:
             state = "Requesting new credentials...";
     }
-    emit infoOutput(state);
+    m_player->printInfo(state);
 }
-
-void SpotifyWrapper::searchContent(QString query){
-    query_url = buildQueryURL(query);
-
-    auto reply = m_oauth2->get(query_url);
-
-    // wait for request finished signal and output error if any
-    connect(reply, &QNetworkReply::finished, [=]() {
-        if (reply->error() != QNetworkReply::NoError) {
-            emit infoOutput(reply->errorString());
-            return;
-        }
-        auto raw_data = reply->readAll();
-//        emit infoOutput(raw_data);
-
-        const QJsonDocument data =
-                QJsonDocument::fromJson(raw_data);
-
-        if (data.isNull()){
-            emit infoOutput("Failed parsing reply data");
-            return;
-        }
-
-        const auto searchResultsJSON = data.object();
-
-    });
-}
-
-void SpotifyWrapper::searchParamChanged(QString query){}
 
 void SpotifyWrapper::accessGranted()
 {
@@ -111,5 +121,5 @@ void SpotifyWrapper::accessGranted()
 
     QString str = "The token is:\n" + m_oauth2->token();
 
-    emit infoOutput(str);
+    m_player->printInfo(str);
 }

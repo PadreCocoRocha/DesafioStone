@@ -2,13 +2,18 @@
 #define PLAYER_H
 
 #include <QWidget>
+#include <QJsonObject>
+#include <QUrl>
 
 QT_BEGIN_NAMESPACE
 class SpotifyWrapper;
+class ResultsBox;
+class SearchBar;
 class QMediaPlayer;
 class QPushButton;
 class QLineEdit;
 class QTextEdit;
+class QVBoxLayout;
 QT_END_NAMESPACE
 
 class Player : public QWidget
@@ -16,22 +21,36 @@ class Player : public QWidget
     Q_OBJECT
 public:
     explicit Player(QWidget *parent = nullptr);
+    SpotifyWrapper* getSpotifyInstance();
+    SearchBar* getSearchBarInstance();
+
+    void printInfo(QString message);
+    void updateLayout();
+
+    enum class searchFilters {
+        Tracks,
+        Albums,
+        Artists
+    };
 
 private:
+    SpotifyWrapper *m_spotify;
     QMediaPlayer *m_player;
+    SearchBar *m_searchBar;
+    ResultsBox *m_resultsBox;
+    QVBoxLayout *m_containerLayout;
+
     QPushButton *m_searchButton;
     QLineEdit *m_searchInput;
-    QTextEdit *m_userOutput;
-    SpotifyWrapper *m_spotify;
+    QTextEdit *m_searchBox;
 
 signals:
     void searchSpotify(QString query);
 
 public slots:
-    void printInfo(QString message);
-    void searchClicked();
-    void clearOutput();
+    void play(QUrl track);
 
+    void searchClicked();
 };
 
 #endif // PLAYER_H

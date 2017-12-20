@@ -1,7 +1,13 @@
 #include "player.h"
 #include "spotifywrapper.h"
 #include "clientkeys.h"
+#include "searchbar.h"
+#include "resultsbox.h"
+
 #include <QMediaPlayer>
+#include <QBoxLayout>
+#include <QtNetwork>
+#include <QJsonObject>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QTextEdit>
@@ -9,63 +15,71 @@
 Player::Player(QWidget *parent) :
     QWidget(parent)
 {
-    setFixedSize(1024,800);
+    // Outer container
+    QVBoxLayout *vContainerLayout = new QVBoxLayout;
+    m_containerLayout = vContainerLayout;
 
-    m_userOutput = new QTextEdit(this);
-    m_userOutput->setGeometry(12,52,994,650);
+    m_searchBar = new SearchBar(parent, this);
 
+    //  Service instances
     m_spotify = new SpotifyWrapper(clientId, clientSecret, this);
-
-    connect(m_spotify, SIGNAL(infoOutput(QString)),
-            this, SLOT(printInfo(QString)));
-
-    m_searchInput = new QLineEdit(this);
-    m_searchInput->setGeometry(12,12,934,30);
-    m_searchInput->setPlaceholderText("Search for songs!");
-
-    m_searchButton = new QPushButton("Search", this);
-    m_searchButton->setGeometry(946,12,60,30);
-
-    connect(m_searchButton, SIGNAL(clicked(bool)),
-            this, SLOT(searchClicked()));
-
-    // Temporary (maybe not)
-    QPushButton *m_connectButton = new QPushButton("Connect", this);
-    m_connectButton->setGeometry(12,710,994,20);
-
-    connect(m_connectButton, SIGNAL(clicked(bool)),
-            m_spotify, SLOT(grant()));
-
-    QPushButton *m_clearButton = new QPushButton("ClearScreen", this);
-    m_clearButton->setGeometry(12,730,994,20);
-
-    connect(m_clearButton, SIGNAL(clicked(bool)),
-            this, SLOT(clearOutput()));
-    // end temp
-
     m_player = new QMediaPlayer(this);
 
-//    connect(m_player, SIGNAL(positionChanged(qint64)),
-//            parent, SLOT(positionChanged(qint64)));
+    QHBoxLayout *vMainLayout = new QHBoxLayout;
 
-//    m_player->setMedia(QUrl::fromLocalFile("/home/lucas/Music/2-10 O barquinho 1.mp3"));
-//    m_player->setVolume(20);
-//    m_player->play();
+    m_resultsBox = new ResultsBox(parent, this);
+    vMainLayout->addWidget(m_resultsBox);
+
+    QPushButton *m_clearButton = new QPushButton("ClearScreen", this);
+
+    vMainLayout->addWidget(m_clearButton);
+
+    vContainerLayout->addWidget(m_searchBar);
+    vContainerLayout->addLayout(vMainLayout);
+
+    connect(m_clearButton, SIGNAL(clicked(bool)), m_resultsBox, SLOT(clearResults()));
+
+    setLayout(vContainerLayout);
+
+    m_spotify->grant();
+
+}
+
+SpotifyWrapper* Player::getSpotifyInstance(){
+    return m_spotify;
+}
+
+SearchBar* Player::getSearchBarInstance(){
+    return m_searchBar;
+}
+
+void Player::printInfo(QString message){
+    QTextStream console(stdout);
+    console << message << endl;
+}
+
+void Player::updateLayout(){
+    m_containerLayout->update();
+}
+
+// public slots
+void Player::play(QUrl trackUrl){
+
+    if (trackUrl.isEmpty()){
+        printInfo("No preview available for this song! =(");
+        return;
+    }
+
+    printInfo(trackUrl.toString());
+    m_player->setMedia(trackUrl);
+    m_player->setVolume(20);
+    m_player->play();
 }
 
 
-// public slots
 void Player::searchClicked(){
     QString query = m_searchInput->text();
     if (query.isNull()) return;
 
     emit searchSpotify(query);
-}
-
-void Player::printInfo(QString message){
-    m_userOutput->append(message);
-}
-
-void Player::clearOutput(){
-    m_userOutput->clear();
 }
