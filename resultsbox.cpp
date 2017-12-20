@@ -14,14 +14,6 @@ ResultsBox::ResultsBox(QWidget *parent, Player *player) :
 
     m_container = new QVBoxLayout(this);
 
-    m_resultList = new QList<ResultItem*>;
-
-    setMinimumSize(200,200);
-
-    m_scrollArea = new QScrollArea;
-    m_scrollArea->setBackgroundRole(QPalette::Dark);
-    m_scrollArea->setWidget(parent);
-
     setLayout(m_container);
 
     connect(player->getSpotifyInstance(), SIGNAL(searchDone(QJsonObject)),
@@ -65,7 +57,6 @@ void ResultsBox::parseResults(QJsonObject &result){
                     }
                 }
 
-//                QLabel *currentItem = new QLabel(name);
                 ResultItem *currentItem = new ResultItem(
                             name, previewUrl, artistName, albumPictureUrl, albumName, this, m_player);
 
@@ -75,9 +66,7 @@ void ResultsBox::parseResults(QJsonObject &result){
                             + " - Album Name: " + albumName));
 
                 // Add new results to resultsBox
-//                m_resultList->append(currentItem);
                 m_container->addWidget(currentItem);
-//                currentItem->show();
             }
         }
     }

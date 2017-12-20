@@ -5,6 +5,7 @@
 #include "resultsbox.h"
 #include "controller.h"
 
+#include <QScrollArea>
 #include <QMediaPlayer>
 #include <QBoxLayout>
 #include <QtNetwork>
@@ -29,18 +30,18 @@ Player::Player(QWidget *parent) :
     QHBoxLayout *vMainLayout = new QHBoxLayout;
 
     m_resultsBox = new ResultsBox(parent, this);
-    vMainLayout->addWidget(m_resultsBox);
+
+    QScrollArea *m_scrollArea = new QScrollArea;
+    m_scrollArea->setBackgroundRole(QPalette::AlternateBase);
+    m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_scrollArea->setWidgetResizable(true);
+    m_scrollArea->setWidget(m_resultsBox);
+    m_scrollArea->setMinimumSize(200,200);
+
+    vMainLayout->addWidget(m_scrollArea);
 //    vMainLayout->addWidget(m_playlistBox);
 
-    // Debugging
-//    QPushButton *m_clearButton = new QPushButton("ClearScreen", this);
-//    connect(m_clearButton, SIGNAL(clicked(bool)), m_resultsBox, SLOT(clearResults()));
-//    vMainLayout->addWidget(m_clearButton);
-
     Controller *m_controller = new Controller(this);
-    m_player->setVolume(10);
-    m_controller->setState(m_player->state());
-    m_controller->setVolume(m_player->volume());
 
     connect(m_controller, SIGNAL(play()), m_player, SLOT(play()));
     connect(m_controller, SIGNAL(pause()), m_player, SLOT(pause()));
@@ -52,6 +53,8 @@ Player::Player(QWidget *parent) :
     connect(m_player, SIGNAL(volumeChanged(int)),
             m_controller, SLOT(changeVolume(int)));
 
+    m_player->setVolume(10);
+    m_controller->setState(m_player->state());
 
     vContainerLayout->addWidget(m_searchBar);
     vContainerLayout->addLayout(vMainLayout);
