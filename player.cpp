@@ -1,10 +1,12 @@
 #include "player.h"
-#include "spotifywrapper.h"
 #include "clientkeys.h"
+#include "spotifywrapper.h"
 #include "searchbar.h"
 #include "resultsbox.h"
 #include "controller.h"
+#include "playlistbox.h"
 
+#include <QStatusBar>
 #include <QScrollArea>
 #include <QMediaPlayer>
 #include <QBoxLayout>
@@ -31,15 +33,27 @@ Player::Player(QWidget *parent) :
 
     m_resultsBox = new ResultsBox(parent, this);
 
-    QScrollArea *m_scrollArea = new QScrollArea;
-    m_scrollArea->setBackgroundRole(QPalette::AlternateBase);
-    m_scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_scrollArea->setWidgetResizable(true);
-    m_scrollArea->setWidget(m_resultsBox);
-    m_scrollArea->setMinimumSize(200,200);
+    QScrollArea *scrollAreaResults = new QScrollArea;
+    scrollAreaResults->setBackgroundRole(QPalette::Base);
+    scrollAreaResults->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollAreaResults->setWidgetResizable(true);
+    scrollAreaResults->setWidget(m_resultsBox);
+    scrollAreaResults->setMinimumSize(300,200);
 
-    vMainLayout->addWidget(m_scrollArea);
-//    vMainLayout->addWidget(m_playlistBox);
+    m_playlistBox = new PlaylistBox(parent, this);
+
+    QScrollArea *scrollAreaPlaylist = new QScrollArea;
+    scrollAreaPlaylist->setBackgroundRole(QPalette::Base);
+    scrollAreaPlaylist->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollAreaPlaylist->setWidgetResizable(true);
+    scrollAreaPlaylist->setWidget(m_playlistBox);
+    scrollAreaPlaylist->setMinimumSize(100,200);
+
+    vMainLayout->addWidget(scrollAreaResults);
+    vMainLayout->addWidget(scrollAreaPlaylist);
+
+    vMainLayout->setStretchFactor(scrollAreaResults, 3);
+    vMainLayout->setStretchFactor(scrollAreaPlaylist, 1);
 
     Controller *m_controller = new Controller(this);
 
@@ -56,13 +70,20 @@ Player::Player(QWidget *parent) :
     m_player->setVolume(10);
     m_controller->setState(m_player->state());
 
+    m_statusBar = new QStatusBar;
+
     vContainerLayout->addWidget(m_searchBar);
     vContainerLayout->addLayout(vMainLayout);
     vContainerLayout->addWidget(m_controller);
+    vContainerLayout->addWidget(m_statusBar);
 
     setLayout(vContainerLayout);
 
-    // Make authentication steps
+    setPlayerReadyStatus(false);
+
+    QTimer::singleShot(15000, this, SLOT(connectionTimeout()));
+
+    m_statusBar->showMessage("Starting Spotify Auth (10sec Timeout)");
     m_spotify->grant();
 
 }
@@ -76,13 +97,13 @@ SearchBar* Player::getSearchBarInstance(){
     return m_searchBar;
 }
 
+QStatusBar* Player::getStatusBarInstance(){
+    return m_statusBar;
+}
+
 void Player::printInfo(QString message){
     QTextStream console(stdout);
     console << message << endl;
-}
-
-void Player::updateLayout(){
-    m_containerLayout->update();
 }
 
 // public slots
@@ -104,4 +125,22 @@ void Player::searchClicked(){
     if (query.isNull()) return;
 
     emit searchSpotify(query);
+}
+
+void Player::connectionTimeout(){
+    if (!playerReadyStatus){
+        m_statusBar->showMessage(
+            "Auth Timeout: close all running instances and try again!");
+    }
+}
+
+// private methods
+void Player::setPlayerReadyStatus(bool status){
+    playerReadyStatus = status;
+
+    if (status){
+        m_searchBar->setEnabled(true);
+    } else {
+        m_searchBar->setEnabled(false);
+    }
 }

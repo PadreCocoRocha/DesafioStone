@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "spotifywrapper.h"
 #include <QWidget>
 #include <QJsonObject>
 #include <QUrl>
@@ -15,6 +16,8 @@ class QLineEdit;
 class QTextEdit;
 class QVBoxLayout;
 class Controller;
+class QStatusBar;
+class PlaylistBox;
 QT_END_NAMESPACE
 
 class Player : public QWidget
@@ -24,9 +27,9 @@ public:
     explicit Player(QWidget *parent = nullptr);
     SpotifyWrapper* getSpotifyInstance();
     SearchBar* getSearchBarInstance();
+    QStatusBar* getStatusBarInstance();
 
     void printInfo(QString message);
-    void updateLayout();
 
     enum class searchFilters {
         Tracks,
@@ -39,7 +42,9 @@ private:
     QMediaPlayer *m_player;
     SearchBar *m_searchBar;
     ResultsBox *m_resultsBox;
+    PlaylistBox *m_playlistBox;
     Controller *m_controller;
+    QStatusBar *m_statusBar;
 
     QVBoxLayout *m_containerLayout;
 
@@ -47,13 +52,16 @@ private:
     QLineEdit *m_searchInput;
     QTextEdit *m_searchBox;
 
+    bool playerReadyStatus;
+
 signals:
     void searchSpotify(QString query);
 
 public slots:
     void play(QUrl track);
-
     void searchClicked();
+    void setPlayerReadyStatus(bool status);
+    void connectionTimeout();
 };
 
 #endif // PLAYER_H

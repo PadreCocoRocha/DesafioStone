@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "player.h"
-#include "spotifywrapper.h"
 
 
 int main(int argc, char *argv[]){

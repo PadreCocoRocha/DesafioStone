@@ -1,6 +1,7 @@
 #include "spotifywrapper.h"
 #include "player.h"
 #include "searchbar.h"
+#include <QStatusBar>
 #include <QWidget>
 #include <QTextStream>
 #include <QJsonObject>
@@ -26,7 +27,6 @@ SpotifyWrapper::SpotifyWrapper(QString clientId, QString clientSecret, Player *p
             &QDesktopServices::openUrl);
 
     connect(m_oauth2, SIGNAL(statusChanged(Status)), this, SLOT(authStatusChanged()));
-    connect(m_oauth2, SIGNAL(granted()), this, SLOT(accessGranted()));
     connect(parent->getSearchBarInstance(), SIGNAL(triggerSpotifySearch(QString,int)),
             this, SLOT(searchContent(QString,int)));
 }
@@ -47,12 +47,6 @@ QUrl SpotifyWrapper::buildQueryURL(QString query){
     }
 
     return QUrl(str);
-}
-
-QUrl SpotifyWrapper::getTrack(QString href){
-    QUrl query_url(href);
-
-    return query_url;
 }
 
 // public slots
@@ -87,8 +81,6 @@ void SpotifyWrapper::searchContent(QString query, int offset){
     });
 }
 
-void SpotifyWrapper::searchParamChanged(QString query){}
-
 void SpotifyWrapper::grant()
 {
     m_oauth2->grant();
@@ -96,30 +88,23 @@ void SpotifyWrapper::grant()
 
 void SpotifyWrapper::authStatusChanged(){
     QString state;
+    grantedAccess = false;
 
     switch (m_oauth2->status()){
         case QAbstractOAuth::Status::NotAuthenticated:
-            state = "Failed authenticating, try again!";
-            grantedAccess = false;
+            state = "Failed authenticating, try restarting!";
             break;
         case QAbstractOAuth::Status::TemporaryCredentialsReceived:
-            state = "Temporary authentication received...";
+            state = "Authenticating Spotify...";
             break;
         case QAbstractOAuth::Status::Granted:
-            state = "Token credentials received,"
-                    " you can now make authenticated calls!";
+            state = "Spotify Authenticated!";
+            grantedAccess = true;
             break;
         case QAbstractOAuth::Status::RefreshingToken:
             state = "Requesting new credentials...";
     }
     m_player->printInfo(state);
-}
-
-void SpotifyWrapper::accessGranted()
-{
-    grantedAccess = true;
-
-    QString str = "The token is:\n" + m_oauth2->token();
-
-    m_player->printInfo(str);
+    m_player->getStatusBarInstance()->showMessage(state);
+    m_player->setPlayerReadyStatus(grantedAccess);
 }

@@ -15,7 +15,6 @@ class SpotifyWrapper : public QObject
     Q_OBJECT
 public:
     SpotifyWrapper(QString clientId, QString clientSecret, Player *parent);
-    QUrl getTrack(QString href);
     void grant();
 
 signals:
@@ -23,9 +22,6 @@ signals:
 
 private slots:
     void authStatusChanged();
-    void accessGranted();
-    void searchParamChanged(QString query);
-
     void searchContent(QString query, int offset = 0);
 
 private:
