@@ -24,6 +24,7 @@ signals:
 
 public slots:
     void playThisPressed();
+    void addToPlaylistPressed();
 
 private:
     QString m_title;
@@ -33,9 +34,8 @@ private:
     QString m_albumName;
 
     Player *m_player;
-    QWidget *m_parent;
-    QPushButton *out;
     QToolButton *m_playButton;
+    QToolButton *m_addButton;
 };
 
 #endif // RESULTITEM_H

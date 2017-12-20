@@ -10,7 +10,6 @@ ResultsBox::ResultsBox(QWidget *parent, Player *player) :
     QWidget(parent)
 {
     m_player = player;
-    m_parent = parent;
 
     m_container = new QVBoxLayout(this);
 
@@ -23,7 +22,7 @@ ResultsBox::ResultsBox(QWidget *parent, Player *player) :
 void ResultsBox::parseResults(QJsonObject &result){
     int total_tracks = 0,
         limit = 20,
-        counter = 0;
+        foundResults = 0;
 
     if (result.contains("tracks")){
         QJsonObject tracks = result["tracks"].toObject();
@@ -57,18 +56,17 @@ void ResultsBox::parseResults(QJsonObject &result){
                     }
                 }
 
+                foundResults++;
                 ResultItem *currentItem = new ResultItem(
                             name, previewUrl, artistName, albumPictureUrl, albumName, this, m_player);
-
-                m_player->printInfo(
-                    QString("Got to parseResults, name: " + name
-                            + " - Artist name: " + artistName
-                            + " - Album Name: " + albumName));
 
                 // Add new results to resultsBox
                 m_container->addWidget(currentItem);
             }
         }
+    }
+    if (foundResults == 0){
+        m_player->getStatusBarInstance()->showMessage("No results found!");
     }
 }
 
@@ -76,15 +74,10 @@ void ResultsBox::parseResults(QJsonObject &result){
 void ResultsBox::showResults(QJsonObject result){
     if (result.isEmpty()) return;
 
-    QVBoxLayout* ql = m_container;
-    QList<ResultItem*> *ri = m_resultList;
-
     // remove all current results
     clearResults();
-
+    // Parse useful data and show it
     parseResults(result);
-
-    m_player->printInfo("Got to show results");
 }
 
 //public slots

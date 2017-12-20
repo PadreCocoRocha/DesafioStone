@@ -27,7 +27,6 @@ public slots:
 
 
 private:
-    QWidget *m_parent;
     Player *m_player;
     QScrollArea *m_scrollArea;
     QList<ResultItem*> *m_resultList;

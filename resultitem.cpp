@@ -7,7 +7,6 @@ ResultItem::ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albu
     QWidget(parent)
 {
     m_player = player;
-    m_parent = parent;
 
     m_title = title;
     m_previewUrl = previewUrl;
@@ -17,17 +16,24 @@ ResultItem::ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albu
 
     QHBoxLayout *vLayout = new QHBoxLayout;
 
-    QLabel *txtLine = new QLabel(title, parent);
+    QLabel *txtLine = new QLabel(title, this);
 
     QToolButton *m_playButton = new QToolButton(this);
     m_playButton->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    m_playButton->setToolTip("Play!");
 
+    QToolButton *m_addButton = new QToolButton(this);
+    m_addButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
+    m_addButton->setToolTip("Add to Playlist");
+
+    vLayout->addWidget(m_addButton);
     vLayout->addWidget(m_playButton);
     vLayout->addWidget(txtLine);
 
     setLayout(vLayout);
 
     connect(m_playButton, SIGNAL(clicked(bool)), this, SLOT(playThisPressed()));
+    connect(m_addButton, SIGNAL(clicked(bool)), this, SLOT(addToPlaylistPressed()));
     connect(this, SIGNAL(playThis(QUrl)), m_player, SLOT(play(QUrl)));
 }
 
@@ -37,6 +43,13 @@ ResultItem::~ResultItem(){
     out << "ResultItem " << m_title << " has been destroyed" << endl;
 }
 
+
+//public slots
 void ResultItem::playThisPressed(){
     emit playThis(m_previewUrl);
+}
+
+
+void ResultItem::addToPlaylistPressed(){
+    m_player->getStatusBarInstance()->showMessage("added!");
 }
