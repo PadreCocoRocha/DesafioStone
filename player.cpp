@@ -3,6 +3,7 @@
 #include "clientkeys.h"
 #include "searchbar.h"
 #include "resultsbox.h"
+#include "controller.h"
 
 #include <QMediaPlayer>
 #include <QBoxLayout>
@@ -29,22 +30,41 @@ Player::Player(QWidget *parent) :
 
     m_resultsBox = new ResultsBox(parent, this);
     vMainLayout->addWidget(m_resultsBox);
+//    vMainLayout->addWidget(m_playlistBox);
 
-    QPushButton *m_clearButton = new QPushButton("ClearScreen", this);
+    // Debugging
+//    QPushButton *m_clearButton = new QPushButton("ClearScreen", this);
+//    connect(m_clearButton, SIGNAL(clicked(bool)), m_resultsBox, SLOT(clearResults()));
+//    vMainLayout->addWidget(m_clearButton);
 
-    vMainLayout->addWidget(m_clearButton);
+    Controller *m_controller = new Controller(this);
+    m_player->setVolume(10);
+    m_controller->setState(m_player->state());
+    m_controller->setVolume(m_player->volume());
+
+    connect(m_controller, SIGNAL(play()), m_player, SLOT(play()));
+    connect(m_controller, SIGNAL(pause()), m_player, SLOT(pause()));
+    connect(m_controller, SIGNAL(stop(bool)), m_player, SLOT(stop()));
+    connect(m_controller, SIGNAL(setVolume(int)), m_player, SLOT(setVolume(int)));
+
+    connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)),
+            m_controller, SLOT(setState(QMediaPlayer::State)));
+    connect(m_player, SIGNAL(volumeChanged(int)),
+            m_controller, SLOT(changeVolume(int)));
+
 
     vContainerLayout->addWidget(m_searchBar);
     vContainerLayout->addLayout(vMainLayout);
-
-    connect(m_clearButton, SIGNAL(clicked(bool)), m_resultsBox, SLOT(clearResults()));
+    vContainerLayout->addWidget(m_controller);
 
     setLayout(vContainerLayout);
 
+    // Make authentication steps
     m_spotify->grant();
 
 }
 
+//public methods
 SpotifyWrapper* Player::getSpotifyInstance(){
     return m_spotify;
 }
@@ -72,7 +92,6 @@ void Player::play(QUrl trackUrl){
 
     printInfo(trackUrl.toString());
     m_player->setMedia(trackUrl);
-    m_player->setVolume(20);
     m_player->play();
 }
 

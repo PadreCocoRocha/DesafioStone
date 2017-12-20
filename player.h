@@ -14,6 +14,7 @@ class QPushButton;
 class QLineEdit;
 class QTextEdit;
 class QVBoxLayout;
+class Controller;
 QT_END_NAMESPACE
 
 class Player : public QWidget
@@ -38,6 +39,8 @@ private:
     QMediaPlayer *m_player;
     SearchBar *m_searchBar;
     ResultsBox *m_resultsBox;
+    Controller *m_controller;
+
     QVBoxLayout *m_containerLayout;
 
     QPushButton *m_searchButton;
