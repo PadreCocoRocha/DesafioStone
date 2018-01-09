@@ -21,15 +21,29 @@ Controller::Controller(QWidget *parent) :
 
     connect(m_stopButton, SIGNAL(clicked(bool)), this, SIGNAL(stop(bool)));
 
+    m_previousButton = new QToolButton(this);
+    m_previousButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
+
+    connect(m_previousButton, SIGNAL(clicked(bool)), this, SIGNAL(previous()));
+
+    m_nextButton = new QToolButton(this);
+    m_nextButton->setIcon(style()->standardIcon(QStyle::SP_MediaSkipForward));
+
+    connect(m_nextButton, SIGNAL(clicked(bool)), this, SIGNAL(next()));
+
     m_volumeSlider = new QSlider(Qt::Horizontal, this);
     m_volumeSlider->setRange(0, 100);
+    m_volumeSlider->setMinimumWidth(200);
 
     connect(m_volumeSlider, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged()));
 
     layout->setMargin(0);
     layout->addWidget(m_stopButton);
+    layout->addWidget(m_previousButton);
     layout->addWidget(m_playButton);
+    layout->addWidget(m_nextButton);
     layout->addWidget(m_volumeSlider);
+    layout->setAlignment(m_volumeSlider, Qt::AlignRight);
 
     setLayout(layout);
 }

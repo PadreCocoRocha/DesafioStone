@@ -15,7 +15,7 @@ class ResultsBox : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ResultsBox(QWidget *parent, Player *player);
+    explicit ResultsBox(Player *player, QWidget *parent = nullptr);
 
 signals:
     void addToPlaylist(QJsonObject track);

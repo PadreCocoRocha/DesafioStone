@@ -6,7 +6,7 @@
 #include <QtWidgets>
 #include <QJsonObject>
 
-ResultsBox::ResultsBox(QWidget *parent, Player *player) :
+ResultsBox::ResultsBox(Player *player, QWidget *parent) :
     QWidget(parent)
 {
     m_player = player;
@@ -66,7 +66,7 @@ void ResultsBox::parseResults(QJsonObject &result){
         }
     }
     if (foundResults == 0){
-        m_player->getStatusBarInstance()->showMessage("No results found!");
+        m_player->showMessage("No results found!");
     }
 }
 

@@ -3,7 +3,7 @@
 #include "player.h"
 #include <QtWidgets>
 
-SearchBar::SearchBar(QWidget *parent, Player *player) :
+SearchBar::SearchBar(Player *player, QWidget *parent) :
     QWidget(parent)
 {
     m_player = player;
@@ -47,8 +47,6 @@ SearchBar::SearchBar(QWidget *parent, Player *player) :
 
     setLayout(vContainerLayout);
 }
-
-
 
 // public slots
 void SearchBar::searchTriggered(){

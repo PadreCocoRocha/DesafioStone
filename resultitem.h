@@ -5,22 +5,26 @@
 #include <QUrl>
 
 QT_BEGIN_NAMESPACE
-//class QUrl;
 class QToolButton;
 class QPushButton;
 class Player;
+class PlaylistItem;
 QT_END_NAMESPACE
 
 class ResultItem : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albumPictureUrl,
-                        QString albumName, QWidget *parent = nullptr, Player *player = nullptr);
-    ~ResultItem();
+    explicit ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albumPictureUrl = QUrl(),
+                        QString albumName = QString(), QWidget *parent = nullptr, Player *player = nullptr);
+    QString getTitle();
+    QString getArtist();
+    QUrl getPreviewUrl();
+//    ~ResultItem();
 
 signals:
-    void playThis(QUrl trackUrl);
+    void play(QUrl trackUrl);
+    void addSongToPlaylist(ResultItem *thisItem);
 
 public slots:
     void playThisPressed();

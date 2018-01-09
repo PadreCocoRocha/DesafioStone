@@ -17,7 +17,12 @@ class QTextEdit;
 class QVBoxLayout;
 class Controller;
 class QStatusBar;
-class PlaylistBox;
+class QMediaPlaylist;
+class ResultItem;
+class PlaylistModel;
+class QListView;
+class QModelIndex;
+//class QKeyEvent;
 QT_END_NAMESPACE
 
 class Player : public QWidget
@@ -25,14 +30,13 @@ class Player : public QWidget
     Q_OBJECT
 public:
     explicit Player(QWidget *parent = nullptr);
+
     SpotifyWrapper* getSpotifyInstance();
     SearchBar* getSearchBarInstance();
-    QStatusBar* getStatusBarInstance();
-
-    void printInfo(QString message);
+    void showMessage(QString msg);
 
     enum class searchFilters {
-        Tracks,
+        Tracks = 0,
         Albums,
         Artists
     };
@@ -42,9 +46,11 @@ private:
     QMediaPlayer *m_player;
     SearchBar *m_searchBar;
     ResultsBox *m_resultsBox;
-    PlaylistBox *m_playlistBox;
+    QMediaPlaylist *m_playlist;
+    PlaylistModel *m_playlistModel;
     Controller *m_controller;
     QStatusBar *m_statusBar;
+    QListView *m_playlistView;
 
     QVBoxLayout *m_containerLayout;
 
@@ -56,12 +62,20 @@ private:
 
 signals:
     void searchSpotify(QString query);
+//    void deleteTrack(QList<QModelIndex> items);
 
 public slots:
     void play(QUrl track);
     void searchClicked();
+    void jump(const QModelIndex &index);
     void setPlayerReadyStatus(bool status);
     void connectionTimeout();
+    void addToPlaylist(ResultItem* item);
+    void playlistIndexChanged(int currItem);
+//    void keyPressEvent(QKeyEvent *event);
+
+
+
 };
 
 #endif // PLAYER_H

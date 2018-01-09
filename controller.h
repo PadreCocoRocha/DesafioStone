@@ -21,6 +21,8 @@ signals:
     void play();
     void pause();
     void stop(bool);
+    void previous();
+    void next();
     void setVolume(int volume);
 
 public slots:
@@ -32,6 +34,9 @@ public slots:
 private:
     QToolButton *m_playButton;
     QToolButton *m_stopButton;
+    QToolButton *m_previousButton;
+    QToolButton *m_nextButton;
+
     QSlider *m_volumeSlider;
 
     QMediaPlayer::State m_playerState;

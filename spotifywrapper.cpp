@@ -1,6 +1,7 @@
 #include "spotifywrapper.h"
 #include "player.h"
 #include "searchbar.h"
+
 #include <QStatusBar>
 #include <QWidget>
 #include <QTextStream>
@@ -59,7 +60,7 @@ void SpotifyWrapper::searchContent(QString query, int offset){
     // wait for request finished signal and output error if any
     connect(reply, &QNetworkReply::finished, [=]() {
         if (reply->error() != QNetworkReply::NoError) {
-            m_player->printInfo(reply->errorString());
+            m_player->showMessage(reply->errorString());
             return;
         }
         // Read reply data to ByteArray
@@ -70,7 +71,7 @@ void SpotifyWrapper::searchContent(QString query, int offset){
                 QJsonDocument::fromJson(raw_data);
 
         if (data.isNull()){
-            m_player->printInfo("Failed parsing reply data");
+            m_player->showMessage("Failed parsing reply data");
             return;
         }
 
@@ -104,7 +105,6 @@ void SpotifyWrapper::authStatusChanged(){
         case QAbstractOAuth::Status::RefreshingToken:
             state = "Requesting new credentials...";
     }
-    m_player->printInfo(state);
-    m_player->getStatusBarInstance()->showMessage(state);
+    m_player->showMessage(state);
     m_player->setPlayerReadyStatus(grantedAccess);
 }

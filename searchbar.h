@@ -15,7 +15,7 @@ class SearchBar : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SearchBar(QWidget *parent, Player *player);
+    explicit SearchBar(Player *player, QWidget *parent = nullptr);
 
 signals:
     void triggerSpotifySearch(QString query, int offset);
