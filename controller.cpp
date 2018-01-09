@@ -3,10 +3,43 @@
 #include <QMediaPlayer>
 #include <QtWidgets>
 
-Controller::Controller(QWidget *parent) :
+// Added this custom slider here to avoid the creation of more files
+// and because this class is used only here
+class JumpingSlider : public QSlider
+{
+public:
+    JumpingSlider() : QSlider(Qt::Horizontal) {}
+
+    // Allows slider to jump on click
+    void mousePressEvent(QMouseEvent *e){
+        int value = QStyle::sliderValueFromPosition(
+                    minimum(), maximum(), e->x(), width());
+        setValue(value);
+        emit sliderMoved(value);
+    }
+    // Allows (again) to move the slider - It was blocked by jump on click
+    void mouseMoveEvent(QMouseEvent *e) { mousePressEvent(e); }
+};
+
+Controller::Controller(QMediaPlayer *player, QWidget *parent) :
     QWidget(parent)
 {
-    QBoxLayout *layout = new QHBoxLayout;
+    m_player = player;
+
+    QBoxLayout *layout = new QVBoxLayout;
+
+// position slider and duration
+    m_positionSlider = new JumpingSlider();
+    m_positionSlider->setRange(0, m_player->duration());
+
+    connect(m_player, SIGNAL(durationChanged(qint64)), this, SLOT(durationChanged(qint64)));
+    connect(m_player, SIGNAL(positionChanged(qint64)), this, SLOT(positionChanged(qint64)));
+    connect(m_positionSlider, SIGNAL(sliderMoved(int)), this, SLOT(setPosition(int)));
+    connect(m_positionSlider, SIGNAL(sliderJumped(int)), this, SLOT(setPosition(int)));
+// end position slider ...
+
+// player control widgets
+    QHBoxLayout *lowerLayout = new QHBoxLayout;
 
     m_playerState = QMediaPlayer::StoppedState;
 
@@ -31,19 +64,23 @@ Controller::Controller(QWidget *parent) :
 
     connect(m_nextButton, SIGNAL(clicked(bool)), this, SIGNAL(next()));
 
-    m_volumeSlider = new QSlider(Qt::Horizontal, this);
+    m_volumeSlider = new JumpingSlider();
     m_volumeSlider->setRange(0, 100);
     m_volumeSlider->setMinimumWidth(200);
 
     connect(m_volumeSlider, SIGNAL(valueChanged(int)), this, SLOT(volumeChanged()));
+// end of player control widgets
 
-    layout->setMargin(0);
-    layout->addWidget(m_stopButton);
-    layout->addWidget(m_previousButton);
-    layout->addWidget(m_playButton);
-    layout->addWidget(m_nextButton);
-    layout->addWidget(m_volumeSlider);
-    layout->setAlignment(m_volumeSlider, Qt::AlignRight);
+    lowerLayout->setMargin(0);
+    lowerLayout->addWidget(m_stopButton);
+    lowerLayout->addWidget(m_previousButton);
+    lowerLayout->addWidget(m_playButton);
+    lowerLayout->addWidget(m_nextButton);
+    lowerLayout->addWidget(m_volumeSlider);
+    lowerLayout->setAlignment(m_volumeSlider, Qt::AlignRight);
+
+    layout->addWidget(m_positionSlider);
+    layout->addLayout(lowerLayout);
 
     setLayout(layout);
 }
@@ -112,4 +149,20 @@ void Controller::playClicked()
         emit pause();
         break;
     }
+}
+
+void Controller::durationChanged(qint64 duration)
+{
+    m_duration = duration / 1000;
+    m_positionSlider->setMaximum(m_duration);
+}
+
+void Controller::positionChanged(qint64 position)
+{
+    if (!m_positionSlider->isSliderDown())
+        m_positionSlider->setValue(position / 1000);
+}
+
+void Controller::setPosition(int position){
+    m_player->setPosition((qint64) position * 1000);
 }

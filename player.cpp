@@ -64,7 +64,7 @@ Player::Player(QWidget *parent) :
     splitter->addWidget(m_playlistView);
 // end Splitter
 
-    Controller *m_controller = new Controller(this);
+    Controller *m_controller = new Controller(m_player);
 
     connect(m_controller, SIGNAL(play()), m_player, SLOT(play()));
     connect(m_controller, SIGNAL(pause()), m_player, SLOT(pause()));
@@ -75,8 +75,7 @@ Player::Player(QWidget *parent) :
 
     connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)),
             m_controller, SLOT(setState(QMediaPlayer::State)));
-    connect(m_player, SIGNAL(volumeChanged(int)),
-            m_controller, SLOT(changeVolume(int)));
+    connect(m_player, SIGNAL(volumeChanged(int)), m_controller, SLOT(changeVolume(int)));
 
     m_player->setVolume(10);
     m_controller->setState(m_player->state());

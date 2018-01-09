@@ -35,12 +35,6 @@ public:
     SearchBar* getSearchBarInstance();
     void showMessage(QString msg);
 
-    enum class searchFilters {
-        Tracks = 0,
-        Albums,
-        Artists
-    };
-
 private:
     SpotifyWrapper *m_spotify;
     QMediaPlayer *m_player;
@@ -73,8 +67,6 @@ public slots:
     void addToPlaylist(ResultItem* item);
     void playlistIndexChanged(int currItem);
 //    void keyPressEvent(QKeyEvent *event);
-
-
 
 };
 
