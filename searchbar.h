@@ -25,6 +25,7 @@ public slots:
 
 private:
     Player *m_player;
+
     QLineEdit *m_searchBox;
     QPushButton *m_searchButton;
     QGroupBox *m_typeFilters;

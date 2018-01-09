@@ -35,7 +35,6 @@ Controller::Controller(QMediaPlayer *player, QWidget *parent) :
     connect(m_player, SIGNAL(durationChanged(qint64)), this, SLOT(durationChanged(qint64)));
     connect(m_player, SIGNAL(positionChanged(qint64)), this, SLOT(positionChanged(qint64)));
     connect(m_positionSlider, SIGNAL(sliderMoved(int)), this, SLOT(setPosition(int)));
-    connect(m_positionSlider, SIGNAL(sliderJumped(int)), this, SLOT(setPosition(int)));
 // end position slider ...
 
 // player control widgets

@@ -93,11 +93,25 @@ Player::Player(QWidget *parent) :
 
     setPlayerReadyStatus(false);
 
-    QTimer::singleShot(15000, this, SLOT(connectionTimeout()));
+    m_timer = new QTimer(this);
 
-    m_statusBar->showMessage("Starting Spotify Auth (15s Timeout)");
+    m_counter = 14;
+    connect(m_timer, &QTimer::timeout, this, [&](){
+        if (m_counter == 0){
+            m_statusBar->showMessage(
+                "Authentication Failed! Try closing all open instances");
+            m_timer->stop();
+            return;
+        }
+        QString message = QString(
+            "Starting Spotify authentication (Timeout: %1s)").arg(m_counter--);
+        m_statusBar->showMessage(message);
+    });
+
+    m_statusBar->showMessage("Starting Spotify authentication (15s Timeout)");
+    m_timer->start(1000);
+
     m_spotify->grant();
-
 }
 
 //public methods
@@ -168,7 +182,7 @@ void Player::playlistIndexChanged(int currItem)
 //{
 //    if( event->key() == Qt::Key_Delete )
 //    {
-////        emit deleteTrack(m_playlistView->selectedIndexes());
+//        emit deleteTrack(m_playlistView->selectedIndexes());
 //        QList<QModelIndex> items = m_playlistView->sele;
 //        m_playlist->removeMedia(items.first().row(), items.last().row());
 //    }
@@ -179,6 +193,7 @@ void Player::setPlayerReadyStatus(bool status){
     playerReadyStatus = status;
 
     if (status){
+        m_timer->stop();
         m_searchBar->setEnabled(true);
     } else {
         m_searchBar->setEnabled(false);

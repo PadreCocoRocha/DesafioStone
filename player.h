@@ -52,7 +52,10 @@ private:
     QLineEdit *m_searchInput;
     QTextEdit *m_searchBox;
 
+    QTimer *m_timer;
+
     bool playerReadyStatus;
+    int m_counter;
 
 signals:
     void searchSpotify(QString query);
