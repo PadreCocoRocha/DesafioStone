@@ -77,7 +77,11 @@ Player::Player(QWidget *parent) :
 
     connect(m_player, SIGNAL(stateChanged(QMediaPlayer::State)),
             m_controller, SLOT(setState(QMediaPlayer::State)));
+    connect(m_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)),
+            this, SLOT(mediaStatusChanged(QMediaPlayer::MediaStatus)));
     connect(m_player, SIGNAL(volumeChanged(int)), m_controller, SLOT(changeVolume(int)));
+
+
 
     m_player->setVolume(10);
     m_controller->setState(m_player->state());
@@ -164,6 +168,30 @@ void Player::connectionTimeout(){
     if (!playerReadyStatus){
         m_statusBar->showMessage(
             "Auth Timeout: close all running instances and try again!");
+    }
+}
+
+void Player::mediaStatusChanged(QMediaPlayer::MediaStatus status){
+    switch (status){
+        case QMediaPlayer::BufferedMedia:
+        case QMediaPlayer::LoadedMedia:
+            showMessage("Done");
+            break;
+        case QMediaPlayer::NoMedia:
+            showMessage("No media");
+            break;
+        case QMediaPlayer::BufferingMedia:
+        case QMediaPlayer::LoadingMedia:
+            showMessage("Loading media...");
+            break;
+        case QMediaPlayer::InvalidMedia:
+            showMessage("Invalid Media");
+            break;
+        case QMediaPlayer::EndOfMedia:
+        case QMediaPlayer::StalledMedia:
+        case QMediaPlayer::UnknownMediaStatus:
+            showMessage(QString());
+            break;
     }
 }
 

@@ -2,6 +2,8 @@
 #define PLAYER_H
 
 #include "spotifywrapper.h"
+
+#include <QMediaPlayer>
 #include <QWidget>
 #include <QJsonObject>
 #include <QUrl>
@@ -10,7 +12,6 @@ QT_BEGIN_NAMESPACE
 class SpotifyWrapper;
 class ResultsBox;
 class SearchBar;
-class QMediaPlayer;
 class QPushButton;
 class QLineEdit;
 class QTextEdit;
@@ -22,7 +23,6 @@ class ResultItem;
 class PlaylistModel;
 class QListView;
 class QModelIndex;
-//class QKeyEvent;
 QT_END_NAMESPACE
 
 class Player : public QWidget
@@ -67,11 +67,14 @@ public slots:
 
     void play(QUrl track);
     void jump(const QModelIndex &index);
+    void mediaStatusChanged(QMediaPlayer::MediaStatus status);
 
     void searchClicked();
 
     void addToPlaylist(ResultItem* item);
     void playlistIndexChanged(int currItem);
+
+
 
 };
 

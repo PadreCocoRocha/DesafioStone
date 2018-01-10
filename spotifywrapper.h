@@ -22,7 +22,7 @@ signals:
 
 private slots:
     void authStatusChanged();
-    void searchContent(QString query, int offset = 0);
+    void searchContent(QString query, int offset);
 
 private:
     QOAuth2AuthorizationCodeFlow *m_oauth2;
