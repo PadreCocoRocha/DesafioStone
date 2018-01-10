@@ -13,7 +13,8 @@ SOURCES += \
     resultsbox.cpp \
     resultitem.cpp \
     controller.cpp \
-    playlistmodel.cpp
+    playlistmodel.cpp \
+    playlistview.cpp
 
 HEADERS += \
     player.h \
@@ -23,5 +24,6 @@ HEADERS += \
     resultsbox.h \
     resultitem.h \
     controller.h \
-    playlistmodel.h
+    playlistmodel.h \
+    playlistview.h
 

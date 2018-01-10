@@ -6,6 +6,7 @@
 #include "controller.h"
 #include "playlistmodel.h"
 #include "resultitem.h"
+#include "playlistview.h"
 
 #include <QStatusBar>
 #include <QScrollArea>
@@ -53,9 +54,10 @@ Player::Player(QWidget *parent) :
 
     m_playlistModel = new PlaylistModel(m_playlist, this);
 
-    m_playlistView = new QListView();
+    m_playlistView = new PlaylistView();
     m_playlistView->setModel(m_playlistModel);
-    m_playlistView->setCurrentIndex(m_playlistModel->index(m_playlist->currentIndex(), 0));
+    m_playlistView->setCurrentIndex(
+        m_playlistModel->index(m_playlist->currentIndex(), 0));
     m_playlistView->setMinimumSize(200,200);
 
     connect(m_playlistView, SIGNAL(activated(QModelIndex)), this, SLOT(jump(QModelIndex)));
@@ -167,26 +169,13 @@ void Player::connectionTimeout(){
 
 void Player::addToPlaylist(ResultItem *item)
 {
-    if (item && m_playlistModel->setBuffer(item)){
-        m_playlist->addMedia(item->getPreviewUrl());
-        m_playlistModel->clearBuffer();
-    }
+    m_playlistModel->addToPlaylist(item);
 }
 
 void Player::playlistIndexChanged(int currItem)
 {
     m_playlistView->setCurrentIndex(m_playlistModel->index(currItem, 0));
 }
-
-//void Player::keyPressEvent(QKeyEvent *event)
-//{
-//    if( event->key() == Qt::Key_Delete )
-//    {
-//        emit deleteTrack(m_playlistView->selectedIndexes());
-//        QList<QModelIndex> items = m_playlistView->sele;
-//        m_playlist->removeMedia(items.first().row(), items.last().row());
-//    }
-//}
 
 // private methods
 void Player::setPlayerReadyStatus(bool status){

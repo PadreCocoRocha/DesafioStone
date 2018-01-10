@@ -21,23 +21,13 @@ public:
     PlaylistModel(QMediaPlaylist *playlist, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    bool setBuffer(ResultItem *item);
-    void clearBuffer();
-
-
-public slots:
-    void beginInsertItems(int start, int end);
-    void beginRemoveItems(int start, int end);
-    void changeItems(int start, int end);
-    void endInsertItems();
-    void endRemoveItems();
+    void addToPlaylist(ResultItem *item);
+    void deleteFromPlaylist(QModelIndex index);
 
 private:
     QMediaPlaylist *m_playlist;
-    QVector<QString> *m_buffer;
     QVector<QVariant> m_data;
 
 };

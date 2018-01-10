@@ -62,14 +62,16 @@ signals:
 //    void deleteTrack(QList<QModelIndex> items);
 
 public slots:
-    void play(QUrl track);
-    void searchClicked();
-    void jump(const QModelIndex &index);
     void setPlayerReadyStatus(bool status);
     void connectionTimeout();
+
+    void play(QUrl track);
+    void jump(const QModelIndex &index);
+
+    void searchClicked();
+
     void addToPlaylist(ResultItem* item);
     void playlistIndexChanged(int currItem);
-//    void keyPressEvent(QKeyEvent *event);
 
 };
 

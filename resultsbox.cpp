@@ -12,6 +12,7 @@ ResultsBox::ResultsBox(Player *player, QWidget *parent) :
     m_player = player;
 
     m_container = new QVBoxLayout(this);
+    m_container->setAlignment(Qt::AlignTop);
 
     setLayout(m_container);
 

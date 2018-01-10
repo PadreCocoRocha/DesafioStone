@@ -14,7 +14,7 @@ ResultItem::ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albu
     m_albumPictureUrl = albumPictureUrl;
     m_albumName = albumName;
 
-    QHBoxLayout *vLayout = new QHBoxLayout;
+    QHBoxLayout *hLayout = new QHBoxLayout;
 
     QString description = m_artist + " - " + m_title;
     QLabel *txtLine = new QLabel(description, this);
@@ -27,11 +27,11 @@ ResultItem::ResultItem(QString title, QUrl previewUrl, QString artist, QUrl albu
     m_addButton->setIcon(style()->standardIcon(QStyle::SP_DialogApplyButton));
     m_addButton->setToolTip("Add to Playlist");
 
-    vLayout->addWidget(m_addButton);
-    vLayout->addWidget(m_playButton);
-    vLayout->addWidget(txtLine);
+    hLayout->addWidget(m_addButton);
+    hLayout->addWidget(m_playButton);
+    hLayout->addWidget(txtLine);
 
-    setLayout(vLayout);
+    setLayout(hLayout);
 
     connect(m_playButton, SIGNAL(clicked(bool)), this, SLOT(playThisPressed()));
     connect(m_addButton, SIGNAL(clicked(bool)), this, SLOT(addToPlaylistPressed()));

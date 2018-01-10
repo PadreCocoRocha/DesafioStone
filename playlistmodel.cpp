@@ -10,11 +10,8 @@ PlaylistModel::PlaylistModel(QMediaPlaylist *playlist, QObject *parent) :
 {
     m_playlist = playlist;
 
-    connect(m_playlist, &QMediaPlaylist::mediaAboutToBeInserted, this, &PlaylistModel::beginInsertItems);
-    connect(m_playlist, &QMediaPlaylist::mediaInserted, this, &PlaylistModel::endInsertItems);
-//    connect(m_playlist, &QMediaPlaylist::mediaAboutToBeRemoved, this, &PlaylistModel::beginRemoveItems);
-//    connect(m_playlist, &QMediaPlaylist::mediaRemoved, this, &PlaylistModel::endRemoveItems);
-    connect(m_playlist, &QMediaPlaylist::mediaChanged, this, &PlaylistModel::changeItems);
+    connect(m_playlist, &QMediaPlaylist::mediaInserted, this, &PlaylistModel::endInsertRows);
+    connect(m_playlist, &QMediaPlaylist::mediaRemoved, this, &PlaylistModel::endRemoveRows);
 }
 
 int PlaylistModel::rowCount(const QModelIndex &parent) const
@@ -39,62 +36,29 @@ QVariant PlaylistModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool PlaylistModel::setBuffer(ResultItem *item){
-    if (item != nullptr){
-
-        m_buffer = new QVector<QString>(3);
-
-        QVector<QString>& buffer = *m_buffer;
-
-        buffer[Title] = item->getTitle();
-        buffer[Artist] = item->getArtist();
-        buffer[PreviewUrl] = item->getPreviewUrl().toString();
-
-        return true;
-    }
-    return false;
-}
-
-void PlaylistModel::clearBuffer(){
-    if (m_buffer != nullptr){
-        delete m_buffer;
-    }
-}
-
 //public slots
-
-void PlaylistModel::beginInsertItems(int start, int end)
+void PlaylistModel::addToPlaylist(ResultItem *item)
 {
-    beginInsertRows(QModelIndex(), start, end);
+    int index = m_playlist->mediaCount();
 
-    QVector<QString> trackData(3), &buffer = *m_buffer;
+    beginInsertRows(QModelIndex(), index, index);
 
-    trackData[Title] = buffer[Title];
-    trackData[Artist] = buffer[Artist];
-    trackData[PreviewUrl] = buffer[PreviewUrl];
+    QVector<QString> trackData(3);
+
+    trackData[Title] = item->getTitle();
+    trackData[Artist] = item->getArtist();
+    trackData[PreviewUrl] = item->getPreviewUrl().toString();
 
     m_data.append(QVariant::fromValue(trackData));
+
+    m_playlist->addMedia(item->getPreviewUrl());
 }
 
-//void PlaylistModel::beginRemoveItems(int start, int end)
-//{
-////    m_data.clear();
-//    beginRemoveRows(QModelIndex(), start, end);
-//    qDebug() << "Removing" << start << "to" << end;
-//    m_data.remove(start);
-//}
-
-void PlaylistModel::changeItems(int start, int end)
+void PlaylistModel::deleteFromPlaylist(QModelIndex index)
 {
-    emit dataChanged(index(start,0), index(end,0));
-}
+    int idx = index.row();
+    beginRemoveRows(QModelIndex(), idx, idx);
 
-void PlaylistModel::endInsertItems()
-{
-    endInsertRows();
+    m_data.removeAt(idx);
+    m_playlist->removeMedia(idx);
 }
-
-//void PlaylistModel::endRemoveItems()
-//{
-//    endInsertRows();
-//}
